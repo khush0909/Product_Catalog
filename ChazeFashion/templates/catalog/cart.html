@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Cart - ChazeFashion{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-6">Your Shopping Cart</h1>
+    
+    {% if cart_items %}
+    <form method="post" action="{% url 'cart' %}">
+        {% csrf_token %}
+        <table class="table w-full">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>
+                        <a href="{% url 'product_detail' item.product.pr_id %}" class="font-semibold hover:underline">
+                            {{ item.product.pr_name }}
+                        </a>
+                    </td>
+                    <td>${{ item.product.pr_price }}</td>
+                    <td>
+                        <input type="number" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="1" max="{{ item.product.pr_stk_quant }}" class="input input-bordered w-20" required />
+                    </td>
