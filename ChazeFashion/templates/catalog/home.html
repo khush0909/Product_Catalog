@@ -1,195 +1,182 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}ChazeFashion - Home{% endblock %}
+{% block title %}Home - ChazeFashion{% endblock title %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="hero min-h-[60vh] bg-gradient-to-r from-primary to-secondary">
-    <div class="hero-content text-center text-neutral-content">
-        <div class="max-w-md">
-            <h1 class="mb-5 text-5xl font-bold">Welcome to ChazeFashion</h1>
-            <p class="mb-5">Discover the latest trends in fashion. From casual wear to formal attire, we have everything you need to express your unique style.</p>
-            <a href="{% url 'product_list' %}" class="btn btn-primary">Shop Now</a>
+<div class="space-y-12">
+    <!-- Hero Section -->
+    <section
+        class="relative bg-gradient-to-r from-purple-900 to-pink-800 text-white rounded-lg shadow-xl overflow-hidden animate-fadeIn">
+        <div class="absolute inset-0 z-0 opacity-20"
+            style="background-image: url('https://placehold.co/1200x600/000000/FFFFFF?text=Fashion+Background'); background-size: cover; background-position: center;">
         </div>
-    </div>
-</div>
-
-<!-- Categories Section -->
-<div class="py-16 bg-base-200">
-    <div class="container mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-12">Shop by Category</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                <figure class="px-10 pt-10">
-                    <div class="avatar placeholder">
-                        <div class="bg-primary text-primary-content rounded-full w-24">
-                            <span class="text-3xl">👨</span>
-                        </div>
-                    </div>
-                </figure>
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Men</h2>
-                    <p class="text-sm">Stylish clothing for men</p>
-                    <div class="card-actions">
-                        <a href="{% url 'product_list' %}?category=Men" class="btn btn-primary btn-sm">Shop Men</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                <figure class="px-10 pt-10">
-                    <div class="avatar placeholder">
-                        <div class="bg-secondary text-secondary-content rounded-full w-24">
-                            <span class="text-3xl">👩</span>
-                        </div>
-                    </div>
-                </figure>
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Women</h2>
-                    <p class="text-sm">Elegant fashion for women</p>
-                    <div class="card-actions">
-                        <a href="{% url 'product_list' %}?category=Women" class="btn btn-secondary btn-sm">Shop Women</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                <figure class="px-10 pt-10">
-                    <div class="avatar placeholder">
-                        <div class="bg-accent text-accent-content rounded-full w-24">
-                            <span class="text-3xl">👦</span>
-                        </div>
-                    </div>
-                </figure>
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Boys</h2>
-                    <p class="text-sm">Cool clothes for boys</p>
-                    <div class="card-actions">
-                        <a href="{% url 'product_list' %}?category=Boys" class="btn btn-accent btn-sm">Shop Boys</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                <figure class="px-10 pt-10">
-                    <div class="avatar placeholder">
-                        <div class="bg-info text-info-content rounded-full w-24">
-                            <span class="text-3xl">👧</span>
-                        </div>
-                    </div>
-                </figure>
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Girls</h2>
-                    <p class="text-sm">Pretty dresses for girls</p>
-                    <div class="card-actions">
-                        <a href="{% url 'product_list' %}?category=Girls" class="btn btn-info btn-sm">Shop Girls</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                <figure class="px-10 pt-10">
-                    <div class="avatar placeholder">
-                        <div class="bg-success text-success-content rounded-full w-24">
-                            <span class="text-3xl">👶</span>
-                        </div>
-                    </div>
-                </figure>
-                <div class="card-body items-center text-center">
-                    <h2 class="card-title">Toddler</h2>
-                    <p class="text-sm">Comfortable baby clothes</p>
-                    <div class="card-actions">
-                        <a href="{% url 'product_list' %}?category=Toddler" class="btn btn-success btn-sm">Shop Toddler</a>
-                    </div>
-                </div>
-            </div>
+        <div class="relative container mx-auto px-6 py-20 text-center z-10">
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-4 leading-tight drop-shadow-lg">
+                Discover Your Style
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-90 drop-shadow-md">
+                Explore the latest trends and timeless classics.
+            </p>
+            <a href="{% url 'product_list' %}"
+                class="btn btn-lg bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 hover-effect">
+                Shop Now <i class="fas fa-arrow-right ml-2"></i>
+            </a>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Featured Products Section -->
-<div class="py-16">
-    <div class="container mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-12">Featured Products</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {% for product in products %}
-            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                <figure class="px-4 pt-4">
-                    {% if product.pr_images %}
-                        <img src="{{ product.pr_images.url }}" alt="{{ product.pr_name }}" class="rounded-xl h-48 w-full object-cover" />
-                    {% else %}
-                        <div class="bg-base-300 rounded-xl h-48 w-full flex items-center justify-center">
-                            <i class="fas fa-tshirt text-6xl text-base-content opacity-50"></i>
-                        </div>
-                    {% endif %}
-                </figure>
-                <div class="card-body">
-                    <h2 class="card-title">{{ product.pr_name }}</h2>
-                    <p class="text-sm text-base-content opacity-70">{{ product.pr_cate }}</p>
+    <!-- Categories Section -->
+    <section class="animate-fadeIn" style="animation-delay: 0.2s;">
+        <h2 class="text-3xl font-bold text-center mb-8 text-white">Shop By Category</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Category Card 1 -->
+            <a href="{% url 'product_list' %}?category=men"
+                class="group block bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <img src="https://placehold.co/400x300/334155/e2e8f0?text=Men+Fashion" alt="Men's Fashion"
+                    class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity duration-300">
+                <div class="p-4 text-center">
+                    <h3 class="text-xl font-semibold text-white group-hover:text-pink-400">Men</h3>
+                    <p class="text-gray-400 text-sm">Explore stylish collections</p>
+                </div>
+            </a>
+            <!-- Category Card 2 -->
+            <a href="{% url 'product_list' %}?category=women"
+                class="group block bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <img src="https://placehold.co/400x300/334155/e2e8f0?text=Women+Fashion" alt="Women's Fashion"
+                    class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity duration-300">
+                <div class="p-4 text-center">
+                    <h3 class="text-xl font-semibold text-white group-hover:text-pink-400">Women</h3>
+                    <p class="text-gray-400 text-sm">Discover elegant designs</p>
+                </div>
+            </a>
+            <!-- Category Card 3 -->
+            <a href="{% url 'product_list' %}?category=kids"
+                class="group block bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <img src="https://placehold.co/400x300/334155/e2e8f0?text=Kids+Fashion" alt="Kids Fashion"
+                    class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity duration-300">
+                <div class="p-4 text-center">
+                    <h3 class="text-xl font-semibold text-white group-hover:text-pink-400">Kids</h3>
+                    <p class="text-gray-400 text-sm">Fun and trendy outfits</p>
+                </div>
+            </a>
+            <!-- Category Card 4 -->
+            <a href="{% url 'product_list' %}?category=accessories"
+                class="group block bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <img src="https://placehold.co/400x300/334155/e2e8f0?text=Accessories" alt="Accessories"
+                    class="w-full h-48 object-cover group-hover:opacity-80 transition-opacity duration-300">
+                <div class="p-4 text-center">
+                    <h3 class="text-xl font-semibold text-white group-hover:text-pink-400">Accessories</h3>
+                    <p class="text-gray-400 text-sm">Complete your look</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="animate-fadeIn" style="animation-delay: 0.4s;">
+        <h2 class="text-3xl font-bold text-center mb-8 text-white">Featured Products</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Product Card 1 (Example) -->
+            <div
+                class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <a href="{% url 'product_detail' product_id=1 %}"> {# Replace 1 with actual product ID #}
+                    <img src="https://placehold.co/400x400/4a5568/e2e8f0?text=Product+1" alt="Product Name"
+                        class="w-full h-64 object-cover">
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-1">Stylish T-Shirt</h3>
+                    <p class="text-gray-400 text-sm mb-2">Men's Casual Wear</p>
                     <div class="flex items-center justify-between">
-                        <div class="text-2xl font-bold text-primary">${{ product.pr_price }}</div>
-                        <div class="rating rating-sm">
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= product.pr_reviews %}
-                                    <input type="radio" name="rating-{{ product.pr_id }}" class="mask mask-star-2 bg-orange-400" checked disabled />
-                                {% else %}
-                                    <input type="radio" name="rating-{{ product.pr_id }}" class="mask mask-star-2 bg-orange-400" disabled />
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="card-actions justify-end">
-                        <a href="{% url 'product_detail' product.pr_id %}" class="btn btn-primary btn-sm">View Details</a>
-                        {% if user.is_authenticated %}
-                            <form method="post" action="{% url 'add_to_cart' product.pr_id %}" class="flex items-center gap-2">
-                                {% csrf_token %}
-                                <input type="number" name="quantity" value="1" min="1" max="{{ product.pr_stk_quant }}" class="input input-bordered w-16" required />
-                                <button type="submit" class="btn btn-outline btn-sm" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </form>
-                        {% endif %}
+                        <span class="text-pink-400 font-bold text-xl">$29.99</span>
+                        <button
+                            class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            {% empty %}
-            <div class="col-span-full text-center py-12">
-                <div class="text-6xl mb-4">👕</div>
-                <h3 class="text-xl font-semibold mb-2">No products available</h3>
-                <p class="text-base-content opacity-70">Check back soon for new arrivals!</p>
+            <!-- Product Card 2 (Example) -->
+            <div
+                class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <a href="{% url 'product_detail' product_id=2 %}"> {# Replace 2 with actual product ID #}
+                    <img src="https://placehold.co/400x400/4a5568/e2e8f0?text=Product+2" alt="Product Name"
+                        class="w-full h-64 object-cover">
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-1">Elegant Dress</h3>
+                    <p class="text-gray-400 text-sm mb-2">Women's Evening Wear</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-pink-400 font-bold text-xl">$79.99</span>
+                        <button
+                            class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            {% endfor %}
+            <!-- Product Card 3 (Example) -->
+            <div
+                class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <a href="{% url 'product_detail' product_id=3 %}"> {# Replace 3 with actual product ID #}
+                    <img src="https://placehold.co/400x400/4a5568/e2e8f0?text=Product+3" alt="Product Name"
+                        class="w-full h-64 object-cover">
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-1">Kids Hoodie</h3>
+                    <p class="text-gray-400 text-sm mb-2">Comfortable and Warm</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-pink-400 font-bold text-xl">$39.99</span>
+                        <button
+                            class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Product Card 4 (Example) -->
+            <div
+                class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <a href="{% url 'product_detail' product_id=4 %}"> {# Replace 4 with actual product ID #}
+                    <img src="https://placehold.co/400x400/4a5568/e2e8f0?text=Product+4" alt="Product Name"
+                        class="w-full h-64 object-cover">
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-1">Sporty Sneakers</h3>
+                    <p class="text-gray-400 text-sm mb-2">Unisex Footwear</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-pink-400 font-bold text-xl">$59.99</span>
+                        <button
+                            class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        {% if products %}
-        <div class="text-center mt-8">
-            <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg">View All Products</a>
+        <div class="text-center mt-10">
+            <a href="{% url 'product_list' %}"
+                class="btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 hover-effect">
+                View All Products <i class="fas fa-arrow-right ml-2"></i>
+            </a>
         </div>
-        {% endif %}
-    </div>
-</div>
+    </section>
 
-<!-- Features Section -->
-<div class="py-16 bg-base-200">
-    <div class="container mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-12">Why Choose ChazeFashion?</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center">
-                <div class="text-4xl mb-4">🚚</div>
-                <h3 class="text-xl font-semibold mb-2">Fast Delivery</h3>
-                <p class="text-base-content opacity-70">Get your fashion items delivered to your doorstep quickly and safely.</p>
-            </div>
-            <div class="text-center">
-                <div class="text-4xl mb-4">💎</div>
-                <h3 class="text-xl font-semibold mb-2">Quality Products</h3>
-                <p class="text-base-content opacity-70">We offer only the highest quality clothing and accessories.</p>
-            </div>
-            <div class="text-center">
-                <div class="text-4xl mb-4">🛡️</div>
-                <h3 class="text-xl font-semibold mb-2">Secure Shopping</h3>
-                <p class="text-base-content opacity-70">Your security is our priority with safe and secure payment options.</p>
-            </div>
+    <!-- Call to Action / Newsletter Signup (Example) -->
+    <section class="bg-gray-800 rounded-lg shadow-xl p-8 text-center animate-fadeIn" style="animation-delay: 0.6s;">
+        <h2 class="text-3xl font-bold text-white mb-4">Stay Updated with ChazeFashion!</h2>
+        <p class="text-gray-400 mb-6">Sign up for our newsletter to get the latest updates on new arrivals, sales, and
+            exclusive offers.</p>
+        <div class="flex justify-center flex-wrap gap-4">
+            <input type="email" placeholder="Enter your email"
+                class="input input-bordered w-full max-w-md bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-pink-400">
+            <button
+                class="btn bg-pink-500 hover:bg-pink-600 text-white font-bold px-6 py-2 rounded-lg shadow-md hover-effect">Subscribe</button>
         </div>
-    </div>
+    </section>
+
 </div>
-{% endblock %} 
+{% endblock content %}

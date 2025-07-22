@@ -1,125 +1,228 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ChazeFashion - Your Style, Your Way{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <title>{% block title %}ChazeFashion{% endblock title %}</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- DaisyUI CDN (for components like dropdowns, modals, etc., if needed) -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Custom styles for the Inter font and general body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            /* Dark gray background */
+            color: #e2e8f0;
+            /* Light text color for contrast */
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        /* Fade-in animation for main content */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        /* Hover effect for links and buttons */
+        .hover-effect {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .hover-effect:hover {
+            transform: translateY(-2px);
+            opacity: 0.8;
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-base-100">
-    <!-- Navigation Bar -->
-    <div class="navbar bg-base-100 shadow-lg">
-        <div class="navbar-start">
-            <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
-                    </svg>
-                </div>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'product_list' %}">Products</a></li>
-                    {% if user.is_authenticated %}
-                        <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
-                        <li><a href="{% url 'profile' %}">Profile</a></li>
-                    {% endif %}
-                </ul>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header / Navigation Bar -->
+    <header class="bg-gray-900 shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="{% url 'home' %}"
+                    class="text-2xl font-bold text-white hover:text-pink-400 transition duration-300">ChazeFashion</a>
             </div>
-            <a href="{% url 'home' %}" class="btn btn-ghost text-xl">
-                <i class="fas fa-tshirt text-primary"></i>
-                ChazeFashion
-            </a>
-        </div>
-        
-        <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1">
-                <li><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="{% url 'product_list' %}">Products</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
-                    <li><a href="{% url 'profile' %}">Profile</a></li>
-                {% endif %}
-            </ul>
-        </div>
-        
-        <div class="navbar-end">
-            {% if user.is_authenticated %}
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                        <div class="w-10 rounded-full">
-                            {% if user.userprofile.avatar %}
-                                <img src="{{ user.userprofile.avatar.url }}" alt="{{ user.username }}" />
-                            {% else %}
-                                <div class="bg-primary text-primary-content rounded-full w-10 h-10 flex items-center justify-center">
-                                    <span class="text-lg font-bold">{{ user.username|first|upper }}</span>
-                                </div>
-                            {% endif %}
+
+            <!-- Search Bar (Desktop) -->
+            <div class="hidden md:flex flex-grow mx-8">
+                <div class="relative w-full max-w-xl">
+                    <input type="text" placeholder="Search for products, brands and more"
+                        class="w-full pl-10 pr-4 py-2 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 bg-gray-800 text-white placeholder-gray-400">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                </div>
+            </div>
+
+            <!-- Navigation Links & Icons -->
+            <div class="flex items-center space-x-6">
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="{% url 'product_list' %}"
+                        class="text-gray-200 hover:text-pink-400 font-medium transition duration-300 hover-effect">Shop</a>
+                    <a href="#"
+                        class="text-gray-200 hover:text-pink-400 font-medium transition duration-300 hover-effect">Men</a>
+                    <a href="#"
+                        class="text-gray-200 hover:text-pink-400 font-medium transition duration-300 hover-effect">Women</a>
+                    <a href="#"
+                        class="text-gray-200 hover:text-pink-400 font-medium transition duration-300 hover-effect">Kids</a>
+                </div>
+
+                <!-- User Icons -->
+                <div class="flex items-center space-x-4 text-gray-200">
+                    {% if user.is_authenticated %}
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar hover-effect">
+                            <div class="w-10 rounded-full">
+                                <img alt="User Avatar" src="{% static 'avatars/spidy.jpg' %}"
+                                    onerror="this.onerror=null;this.src='https://placehold.co/40x40/4a5568/e2e8f0?text=User';" />
+                            </div>
                         </div>
+                        <ul tabindex="0"
+                            class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-gray-800 rounded-box w-52 text-gray-200">
+                            <li><a href="{% url 'profile' %}" class="hover:text-pink-400">Profile</a></li>
+                            <li><a href="{% url 'wishlist' %}" class="hover:text-pink-400">Wishlist</a></li>
+                            <li><a href="{% url 'logout' %}" class="hover:text-pink-400">Logout</a></li>
+                        </ul>
                     </div>
-                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><a href="{% url 'profile' %}">Profile</a></li>
-                        <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
-                        <li><a href="{% url 'logout' %}">Logout</a></li>
-                    </ul>
+                    {% else %}
+                    <a href="{% url 'login' %}"
+                        class="flex flex-col items-center text-sm hover:text-pink-400 transition duration-300 hover-effect">
+                        <i class="fas fa-user text-lg"></i>
+                        <span class="hidden md:block">Profile</span>
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'wishlist' %}"
+                        class="flex flex-col items-center text-sm hover:text-pink-400 transition duration-300 hover-effect">
+                        <i class="fas fa-heart text-lg"></i>
+                        <span class="hidden md:block">Wishlist</span>
+                    </a>
+                    <a href="{% url 'cart' %}"
+                        class="flex flex-col items-center text-sm hover:text-pink-400 transition duration-300 hover-effect">
+                        <i class="fas fa-shopping-bag text-lg"></i>
+                        <span class="hidden md:block">Bag</span>
+                    </a>
                 </div>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
-                <a href="{% url 'signup' %}" class="btn btn-outline ml-2">Sign Up</a>
-            {% endif %}
-        </div>
-    </div>
 
-    <!-- Messages -->
-    {% if messages %}
-        <div class="container mx-auto px-4 mt-4">
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %} shadow-lg mb-4">
-                    <div>
-                        {% if message.tags == 'error' %}
-                            <i class="fas fa-exclamation-circle"></i>
-                        {% elif message.tags == 'success' %}
-                            <i class="fas fa-check-circle"></i>
-                        {% else %}
-                            <i class="fas fa-info-circle"></i>
-                        {% endif %}
-                        <span>{{ message }}</span>
-                    </div>
+                <!-- Mobile Menu Button (Hamburger) -->
+                <div class="md:hidden">
+                    <button class="text-gray-200 focus:outline-none hover-effect">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
                 </div>
-            {% endfor %}
+            </div>
+        </nav>
+        <!-- Mobile Search Bar (hidden by default, shown on mobile) -->
+        <div class="md:hidden px-4 py-2 border-t border-gray-700">
+            <div class="relative w-full">
+                <input type="text" placeholder="Search for products, brands and more"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 bg-gray-800 text-white placeholder-gray-400">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+            </div>
         </div>
-    {% endif %}
+    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <!-- Main Content Area -->
+    <main class="flex-grow container mx-auto px-4 py-8 animate-fadeIn">
         {% block content %}
-        {% endblock %}
+        <!-- Content from child templates will be inserted here -->
+        {% endblock content %}
     </main>
 
     <!-- Footer -->
-    <footer class="footer footer-center p-10 bg-base-200 text-base-content rounded">
-        <nav class="grid grid-flow-col gap-4">
-            <a href="{% url 'home' %}" class="link link-hover">Home</a>
-            <a href="{% url 'product_list' %}" class="link link-hover">Products</a>
-            {% if user.is_authenticated %}
-                <a href="{% url 'wishlist' %}" class="link link-hover">Wishlist</a>
-                <a href="{% url 'profile' %}" class="link link-hover">Profile</a>
-            {% else %}
-                <a href="{% url 'login' %}" class="link link-hover">Login</a>
-                <a href="{% url 'signup' %}" class="link link-hover">Sign Up</a>
-            {% endif %}
-        </nav> 
-        <nav>
-            <div class="grid grid-flow-col gap-4">
-                <a href="#"><i class="fab fa-twitter text-xl"></i></a>
-                <a href="#"><i class="fab fa-instagram text-xl"></i></a>
-                <a href="#"><i class="fab fa-facebook text-xl"></i></a>
+    <footer class="bg-gray-950 text-white py-8 mt-auto">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Column 1: About -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4 text-white">ChazeFashion</h3>
+                <p class="text-gray-400 text-sm">Your ultimate destination for the latest fashion trends. Shop with
+                    confidence and style.</p>
             </div>
-        </nav> 
-        <aside>
-            <p>Copyright © 2024 - All rights reserved by ChazeFashion</p>
-        </aside>
+
+            <!-- Column 2: Quick Links -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4 text-white">Quick Links</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="{% url 'home' %}"
+                            class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">Home</a></li>
+                    <li><a href="{% url 'product_list' %}"
+                            class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">Shop All</a>
+                    </li>
+                    <li><a href="#" class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">About
+                            Us</a></li>
+                    <li><a href="#"
+                            class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">Contact
+                            Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Customer Service -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4 text-white">Customer Service</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#"
+                            class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">FAQ</a></li>
+                    <li><a href="#"
+                            class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">Returns &
+                            Exchanges</a></li>
+                    <li><a href="#"
+                            class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">Shipping
+                            Information</a></li>
+                    <li><a href="#"
+                            class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect">Privacy
+                            Policy</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Connect With Us -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4 text-white">Connect With Us</h3>
+                <div class="flex space-x-4 text-xl">
+                    <a href="#" class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect"><i
+                            class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect"><i
+                            class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-pink-400 transition duration-300 hover-effect"><i
+                            class="fab fa-pinterest"></i></a>
+                </div>
+                <p class="text-gray-400 text-sm mt-4">&copy; 2024 ChazeFashion. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
+
 </body>
-</html> 
+
+</html>

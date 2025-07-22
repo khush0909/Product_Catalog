@@ -34,6 +34,12 @@ class Product(models.Model):
     def __str__(self):
         return self.pr_name
 
+    # You might want to add a get_absolute_url method here for consistency
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('product_detail', kwargs={'product_id': self.pr_id})
+
+
 # Seller Model
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -51,6 +57,10 @@ class UserProfile(models.Model):
     address = models.TextField(blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # The 'cart' field here should ideally link to a Cart model instance
+    # that is associated with this UserProfile, or directly to the User.
+    # Given the Cart model below, linking directly to User in Cart is more common.
+    # This field might be redundant if Cart has a OneToOneField to User.
     cart = models.OneToOneField('Cart', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
@@ -64,7 +74,21 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart of {self.user.username}"
 
-# Wishlist Model
+# CartItem Model (moved here to be near Cart)
+class CartItem(models.Model):
+    cart = models.ForeignKey('Cart', on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.pr_name}"
+
+    @property
+    def subtotal(self):
+        return self.quantity * self.product.pr_price
+
+
+# Wishlist Model (updated to ManyToMany as per your input)
 class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     products = models.ManyToManyField(Product, blank=True)
@@ -76,15 +100,19 @@ class Wishlist(models.Model):
 class OrderedItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2) # Price at the time of order
 
     def __str__(self):
         return f"{self.quantity} x {self.product.pr_name}"
 
+    @property
+    def item_total(self):
+        return self.quantity * self.price
+
 # Order Model
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    items = models.ManyToManyField(OrderedItem)
+    items = models.ManyToManyField(OrderedItem) # Many-to-many relationship with OrderedItem
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default="Pending")
@@ -96,7 +124,7 @@ class Order(models.Model):
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField(default=5)
+    rating = models.PositiveIntegerField(default=5) # Assuming 1-5 rating
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -114,11 +142,3 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.id} for Order {self.order.id}"
-
-class CartItem(models.Model):
-    cart = models.ForeignKey('Cart', on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-
-    def __str__(self):
-        return f"{self.quantity} x {self.product.pr_name}"

@@ -1,199 +1,160 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ product.pr_name }} - ChazeFashion{% endblock %}
+{% block title %}{{ product.name }} - ChazeFashion{% endblock title %}
 
 {% block content %}
-<div class="container mx-auto">
-    <!-- Breadcrumb -->
-    <div class="text-sm breadcrumbs mb-6">
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'product_list' %}">Products</a></li>
-            <li>{{ product.pr_name }}</li>
-        </ul>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Product Image -->
-        <div class="card bg-base-100 shadow-xl">
-            <figure class="px-4 pt-4">
-                {% if product.pr_images %}
-                <img src="{{ product.pr_images.url }}" alt="{{ product.pr_name }}"
-                    class="rounded-xl w-full h-96 object-cover" />
-                {% else %}
-                <div class="bg-base-300 rounded-xl w-full h-96 flex items-center justify-center">
-                    <i class="fas fa-tshirt text-8xl text-base-content opacity-50"></i>
-                </div>
-                {% endif %}
-            </figure>
+<div class="animate-fadeIn">
+    {% if product %} {# Assuming 'product' object is passed from Django view #}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700">
+        <!-- Product Image Gallery -->
+        <div class="flex flex-col items-center">
+            <img src="{{ product.image.url|default:'https://placehold.co/600x600/4a5568/e2e8f0?text=Product+Image' }}"
+                alt="{{ product.name }}" class="w-full max-w-lg h-auto object-cover rounded-lg shadow-md mb-4">
+            <!-- Small image thumbnails (if multiple images exist) -->
+            <div class="flex space-x-2 overflow-x-auto no-scrollbar">
+                <img src="https://placehold.co/100x100/4a5568/e2e8f0?text=Thumb1" alt="Thumbnail 1"
+                    class="w-20 h-20 object-cover rounded-md cursor-pointer border-2 border-transparent hover:border-pink-400 transition duration-300">
+                <img src="https://placehold.co/100x100/4a5568/e2e8f0?text=Thumb2" alt="Thumbnail 2"
+                    class="w-20 h-20 object-cover rounded-md cursor-pointer border-2 border-transparent hover:border-pink-400 transition duration-300">
+                <img src="https://placehold.co/100x100/4a5568/e2e8f0?text=Thumb3" alt="Thumbnail 3"
+                    class="w-20 h-20 object-cover rounded-md cursor-pointer border-2 border-transparent hover:border-pink-400 transition duration-300">
+                <!-- Add more thumbnails as needed, possibly from product.images_set -->
+            </div>
         </div>
 
         <!-- Product Details -->
-        <div class="space-y-6">
-            <div>
-                <h1 class="text-3xl font-bold mb-2">{{ product.pr_name }}</h1>
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="badge badge-primary">{{ product.pr_cate }}</span>
-                    <span class="badge badge-secondary">{{ product.pr_season }}</span>
-                    {% if product.pr_brand %}
-                    <span class="badge badge-accent">{{ product.pr_brand }}</span>
-                    {% endif %}
-                </div>
+        <div class="flex flex-col justify-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">{{ product.name }}</h1>
+            <p class="text-gray-400 text-lg mb-4">{{ product.category.name }}</p> {# Assuming product has a category
+            object #}
 
-                <!-- Rating -->
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="rating rating-md">
-                        {% for i in "12345" %}
-                        {% if forloop.counter
-                        <= product.pr_reviews %} <input type="radio" name="rating"
-                            class="mask mask-star-2 bg-orange-400" checked disabled />
-                        {% else %}
-                        <input type="radio" name="rating" class="mask mask-star-2 bg-orange-400" disabled />
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                    <span class="text-sm text-base-content opacity-70">
-                        ({{ product.pr_reviews }} stars)
-                    </span>
-                </div>
+            <div class="flex items-center mb-6">
+                <span class="text-pink-400 font-bold text-5xl">${{ product.price|floatformat:2 }}</span>
+                <span class="text-gray-500 line-through ml-4 text-xl">${{
+                    product.original_price|default:''|floatformat:2 }}</span> {# Optional: original price for discount
+                #}
+                {% if product.discount_percentage %}
+                <span class="ml-4 text-green-400 text-lg font-semibold">{{ product.discount_percentage }}% Off</span>
+                {% endif %}
+            </div>
 
-                <!-- Price -->
-                <div class="text-4xl font-bold text-primary mb-4">
-                    ${{ product.pr_price }}
-                </div>
+            <p class="text-gray-300 leading-relaxed mb-6">
+                {{ product.description|default:'A high-quality product designed for comfort and style. Perfect for any
+                occasion, offering durability and a premium feel.' }}
+            </p>
 
-                <!-- Stock Status -->
-                <div class="mb-4">
-                    {% if product.pr_stk_quant > 0 %}
-                    <span class="badge badge-success gap-2">
-                        <i class="fas fa-check"></i>
-                        In Stock ({{ product.pr_stk_quant }} available)
-                    </span>
-                    {% else %}
-                    <span class="badge badge-error gap-2">
-                        <i class="fas fa-times"></i>
-                        Out of Stock
-                    </span>
-                    {% endif %}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-white mb-2">Available Sizes:</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for size in product.available_sizes %} {# Assuming product.available_sizes is a list of strings
+                    #}
+                    <button
+                        class="btn btn-sm bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 rounded-md px-4 py-2 hover-effect">
+                        {{ size }}
+                    </button>
+                    {% empty %}
+                    <span class="text-gray-500 text-sm">No sizes available.</span>
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- Product Specifications -->
-            <div class="card bg-base-200">
-                <div class="card-body">
-                    <h2 class="card-title text-lg mb-4">Product Details</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {% if product.pr_fabric %}
-                        <div>
-                            <span class="font-semibold">Fabric:</span>
-                            <span>{{ product.pr_fabric }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if product.pr_texture %}
-                        <div>
-                            <span class="font-semibold">Texture:</span>
-                            <span>{{ product.pr_texture }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if product.pr_dimensions %}
-                        <div>
-                            <span class="font-semibold">Dimensions:</span>
-                            <span>{{ product.pr_dimensions }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if product.pr_weights %}
-                        <div>
-                            <span class="font-semibold">Weight:</span>
-                            <span>{{ product.pr_weights }}</span>
-                        </div>
-                        {% endif %}
-
-                        {% if product.pr_offers %}
-                        <div class="md:col-span-2">
-                            <span class="font-semibold">Special Offers:</span>
-                            <span class="text-primary">{{ product.pr_offers }}</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-white mb-2">Quantity:</h3>
+                <input type="number" value="1" min="1"
+                    class="w-24 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white text-center focus:outline-none focus:ring-2 focus:ring-pink-400">
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-4">
-                {% if user.is_authenticated %}
-                {% if product.pr_stk_quant > 0 %}
-                <a href="{% url 'add_to_cart' product.pr_id %}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-shopping-cart mr-2"></i>
-                    Add to Cart
-                </a>
-                {% endif %}
-
-                <a href="{% url 'add_to_wishlist' product.pr_id %}" class="btn btn-outline btn-lg">
-                    <i class="fas fa-heart mr-2"></i>
-                    Add to Wishlist
-                </a>
-                {% else %}
-                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-sign-in-alt mr-2"></i>
-                    Login to Purchase
-                </a>
-                {% endif %}
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button
+                    class="flex-1 btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover-effect">
+                    <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                </button>
+                <button
+                    class="flex-1 btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover-effect">
+                    <i class="fas fa-heart mr-2"></i> Add to Wishlist
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Reviews Section -->
-    <div class="mt-12">
-        <h2 class="text-2xl font-bold mb-6">Customer Reviews</h2>
-
-        {% if reviews %}
-        <div class="space-y-4">
-            {% for review in reviews %}
-            <div class="card bg-base-100 shadow-lg">
-                <div class="card-body">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <div class="avatar placeholder">
-                                <div class="bg-primary text-primary-content rounded-full w-8">
-                                    <span class="text-xs">{{ review.user.username|first|upper }}</span>
-                                </div>
-                            </div>
-                            <span class="font-semibold">{{ review.user.username }}</span>
-                        </div>
-                        <div class="rating rating-sm">
-                            {% for i in "12345" %}
-                            {% if forloop.counter
-                            <= review.rating %} <input type="radio" name="rating-{{ review.id }}"
-                                class="mask mask-star-2 bg-orange-400" checked disabled />
-                            {% else %}
-                            <input type="radio" name="rating-{{ review.id }}" class="mask mask-star-2 bg-orange-400"
-                                disabled />
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    {% if review.comment %}
-                    <p class="text-base-content">{{ review.comment }}</p>
-                    {% endif %}
-
-                    <div class="text-xs text-base-content opacity-50 mt-2">
-                        {{ review.created_at|date:"F j, Y" }}
+    <!-- Related Products Section (Example) -->
+    <section class="mt-16 animate-fadeIn" style="animation-delay: 0.2s;">
+        <h2 class="text-3xl font-bold text-white mb-8 text-center">You Might Also Like</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Related Product Card 1 (Example) -->
+            <div
+                class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <a href="{% url 'product_detail' product_id=5 %}"> {# Replace 5 with actual product ID #}
+                    <img src="https://placehold.co/400x400/4a5568/e2e8f0?text=Related+1" alt="Related Product"
+                        class="w-full h-64 object-cover">
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-1">Casual Shirt</h3>
+                    <p class="text-gray-400 text-sm mb-2">Men's Collection</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-pink-400 font-bold text-xl">$34.99</span>
+                        <button
+                            class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+            <!-- Related Product Card 2 (Example) -->
+            <div
+                class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <a href="{% url 'product_detail' product_id=6 %}"> {# Replace 6 with actual product ID #}
+                    <img src="https://placehold.co/400x400/4a5568/e2e8f0?text=Related+2" alt="Related Product"
+                        class="w-full h-64 object-cover">
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-1">Denim Jeans</h3>
+                    <p class="text-gray-400 text-sm mb-2">Unisex Wear</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-pink-400 font-bold text-xl">$49.99</span>
+                        <button
+                            class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Related Product Card 3 (Example) -->
+            <div
+                class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                <a href="{% url 'product_detail' product_id=7 %}"> {# Replace 7 with actual product ID #}
+                    <img src="https://placehold.co/400x400/4a5568/e2e8f0?text=Related+3" alt="Related Product"
+                        class="w-full h-64 object-cover">
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white mb-1">Summer Dress</h3>
+                    <p class="text-gray-400 text-sm mb-2">Women's Collection</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-pink-400 font-bold text-xl">$65.00</span>
+                        <button
+                            class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        {% else %}
-        <div class="text-center py-8">
-            <div class="text-4xl mb-4">💬</div>
-            <h3 class="text-xl font-semibold mb-2">No reviews yet</h3>
-            <p class="text-base-content opacity-70">Be the first to review this product!</p>
-        </div>
-        {% endif %}
+    </section>
+
+    {% else %}
+    <div class="text-center py-16 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
+        <i class="fas fa-exclamation-circle text-6xl text-gray-500 mb-6"></i>
+        <p class="text-xl text-gray-300 mb-4">Product not found.</p>
+        <p class="text-gray-400">The product you are looking for might not exist or is unavailable.</p>
+        <a href="{% url 'product_list' %}"
+            class="btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 hover-effect mt-8">
+            Back to Products
+        </a>
     </div>
+    {% endif %}
 </div>
-{% endblock %}
+{% endblock content %}

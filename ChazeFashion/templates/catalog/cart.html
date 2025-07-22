@@ -1,33 +1,94 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Your Cart - ChazeFashion{% endblock %}
+{% block title %}Shopping Cart - ChazeFashion{% endblock title %}
 
 {% block content %}
-<div class="container mx-auto py-8">
-    <h1 class="text-3xl font-bold mb-6">Your Shopping Cart</h1>
-    
-    {% if cart_items %}
-    <form method="post" action="{% url 'cart' %}">
-        {% csrf_token %}
-        <table class="table w-full">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Subtotal</th>
-                    <th>Remove</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart_items %}
-                <tr>
-                    <td>
-                        <a href="{% url 'product_detail' item.product.pr_id %}" class="font-semibold hover:underline">
-                            {{ item.product.pr_name }}
-                        </a>
-                    </td>
-                    <td>${{ item.product.pr_price }}</td>
-                    <td>
-                        <input type="number" name="quantity_{{ item.id }}" value="{{ item.quantity }}" min="1" max="{{ item.product.pr_stk_quant }}" class="input input-bordered w-20" required />
-                    </td>
+<div class="animate-fadeIn">
+    <h1 class="text-4xl font-bold text-white mb-8 text-center">Your Shopping Cart</h1>
+
+    {% if cart_items %} {# Assuming cart_items is passed from your Django view #}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Cart Items List -->
+            <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-700">
+                <h2 class="text-2xl font-semibold text-white mb-6">Items in your Bag</h2>
+                <div class="space-y-6">
+                    {% for item in cart_items %} {# Loop through actual cart items #}
+                        <div class="flex items-center space-x-4 border-b border-gray-700 pb-4 last:border-b-0">
+                            <div class="flex-shrink-0">
+                                <img src="{{ item.product.image.url|default:'https://placehold.co/100x100/4a5568/e2e8f0?text=Product' }}" alt="{{ item.product.name }}" class="w-24 h-24 object-cover rounded-lg shadow-md">
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="text-lg font-semibold text-white">{{ item.product.name }}</h3>
+                                <p class="text-gray-400 text-sm">{{ item.product.category }}</p>
+                                <p class="text-pink-400 font-bold mt-1">${{ item.product.price|floatformat:2 }}</p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <form action="{% url 'update_cart_item' item.id %}" method="post" class="flex items-center space-x-2">
+                                    {% csrf_token %}
+                                    <label for="quantity-{{ item.id }}" class="sr-only">Quantity</label>
+                                    <input type="number" id="quantity-{{ item.id }}" name="quantity" value="{{ item.quantity }}" min="1"
+                                           class="w-16 px-2 py-1 rounded-md bg-gray-700 border border-gray-600 text-white text-center focus:outline-none focus:ring-1 focus:ring-pink-400">
+                                    <button type="submit" class="btn btn-sm bg-gray-700 hover:bg-gray-600 text-white rounded-md px-3 py-1 hover-effect">
+                                        Update
+                                    </button>
+                                </form>
+                                <form action="{% url 'remove_from_cart' item.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm bg-red-600 hover:bg-red-700 text-white rounded-md px-3 py-1 hover-effect">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-white font-semibold">Subtotal:</p>
+                                <p class="text-pink-400 font-bold">${{ item.subtotal|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="lg:col-span-1 bg-gray-800 p-6 rounded-lg shadow-xl border border-gray-700 h-fit">
+                <h2 class="text-2xl font-semibold text-white mb-6">Order Summary</h2>
+                <div class="space-y-4 text-gray-300">
+                    <div class="flex justify-between">
+                        <span>Items Total:</span>
+                        <span class="font-semibold text-white">${{ total_price|floatformat:2 }}</span> {# Assuming total_price is passed #}
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Shipping:</span>
+                        <span class="font-semibold text-white">$5.00</span> {# Example shipping cost #}
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tax:</span>
+                        <span class="font-semibold text-white">$0.00</span> {# Example tax #}
+                    </div>
+                    <div class="border-t border-gray-700 pt-4 mt-4 flex justify-between text-xl font-bold text-white">
+                        <span>Grand Total:</span>
+                        <span class="text-pink-400">${{ grand_total|floatformat:2 }}</span> {# Assuming grand_total is passed #}
+                    </div>
+                </div>
+                <div class="mt-8 space-y-4">
+                    <a href="#" class="w-full btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg shadow-md text-center block hover-effect">
+                        Proceed to Checkout <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="{% url 'product_list' %}" class="w-full btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg shadow-md text-center block hover-effect">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-16 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
+            <i class="fas fa-shopping-cart text-6xl text-gray-500 mb-6"></i>
+            <p class="text-xl text-gray-300 mb-4">Your cart is empty.</p>
+            <p class="text-gray-400 mb-8">Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'product_list' %}" class="btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 hover-effect">
+                Start Shopping
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

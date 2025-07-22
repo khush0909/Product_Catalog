@@ -1,186 +1,250 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login, logout
 from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from .models import Product, UserProfile, Cart, Wishlist, Order, CartItem
-from .forms import UserProfileForm
+# Import all your models from catalog.models
+from .models import Product, Seller, UserProfile, Cart, CartItem, Wishlist, OrderedItem, Order, Review, Payment
 
-def home(request):
-    """Home/Landing page"""
-    products = Product.objects.all()[:8]  # Show first 8 products
-    context = {
-        'products': products,
-    }
-    return render(request, 'catalog/home.html', context)
+# --- Authentication Views ---
 
-def signup(request):
-    """User registration"""
+def signup_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Create user profile
+            # Create a UserProfile, Cart, and Wishlist for the new user
             UserProfile.objects.create(user=user)
-            # Create cart for user
             Cart.objects.create(user=user)
-            # Create wishlist for user
             Wishlist.objects.create(user=user)
-            
             login(request, user)
-            messages.success(request, 'Account created successfully!')
-            return redirect('home')
+            messages.success(request, "Account created successfully!")
+            return redirect('home') # Redirect to home page after successful signup
+        else:
+            # Add form errors to messages
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = UserCreationForm()
-    
     return render(request, 'catalog/signup.html', {'form': form})
 
-def user_login(request):
-    """User login"""
+def login_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
-            return redirect('home')
+            messages.success(request, f"Welcome back, {user.username}!")
+            return redirect('home') # Redirect to home page after successful login
         else:
-            messages.error(request, 'Invalid username or password.')
-    
-    return render(request, 'catalog/login.html')
+            messages.error(request, "Invalid username or password.")
+    else:
+        form = AuthenticationForm()
+    return render(request, 'catalog/login.html', {'form': form})
 
 @login_required
-def user_logout(request):
-    """User logout"""
+def logout_view(request):
     logout(request)
-    messages.success(request, 'You have been logged out successfully.')
+    messages.info(request, "You have been logged out.")
     return redirect('home')
 
-@login_required
-def profile(request):
-    """User profile page"""
-    user_profile = get_object_or_404(UserProfile, user=request.user)
-    
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('profile')
-    else:
-        form = UserProfileForm(instance=user_profile)
-    
+# --- Product & Catalog Views ---
+
+def home(request):
+    # Fetch some featured products for the homepage
+    # Using pr_id for ordering as it's the primary key and likely reflects creation order
+    featured_products = Product.objects.all().order_by('-pr_id')[:8]
+    # Categories are now directly from Product.CATEGORY_CHOICES
+    categories = [choice[0] for choice in Product.CATEGORY_CHOICES]
+
     context = {
-        'user_profile': user_profile,
-        'form': form,
+        'featured_products': featured_products,
+        'categories': categories,
     }
-    return render(request, 'catalog/profile.html', context)
+    return render(request, 'catalog/home.html', context)
 
 def product_list(request):
-    """Product catalog with filtering"""
     products = Product.objects.all()
+    category_name = request.GET.get('category')
+    sort_by = request.GET.get('sort')
+
+    if category_name and category_name != 'All Products': # 'All Products' is a display choice, not a filter
+        products = products.filter(pr_cate__iexact=category_name)
     
-    # Filtering
-    category = request.GET.get('category')
-    season = request.GET.get('season')
-    fabric = request.GET.get('fabric')
-    price_min = request.GET.get('price_min')
-    price_max = request.GET.get('price_max')
-    brand = request.GET.get('brand')
-    
-    if category:
-        products = products.filter(pr_cate=category)
-    if season:
-        products = products.filter(pr_season=season)
-    if fabric:
-        products = products.filter(pr_fabric__icontains=fabric)
-    if price_min:
-        products = products.filter(pr_price__gte=price_min)
-    if price_max:
-        products = products.filter(pr_price__lte=price_max)
-    if brand:
-        products = products.filter(pr_brand__icontains=brand)
-    
+    if sort_by == 'price_asc':
+        products = products.order_by('pr_price')
+    elif sort_by == 'price_desc':
+        products = products.order_by('-pr_price')
+    elif sort_by == 'newest':
+        products = products.order_by('-pr_id') # Assuming pr_id reflects creation order
+
     context = {
         'products': products,
-        'categories': Product.CATEGORY_CHOICES,
-        'seasons': Product.SEASON_CHOICES,
+        'current_category': category_name,
+        'current_sort': sort_by,
+        'categories': [choice[0] for choice in Product.CATEGORY_CHOICES], # Pass categories for filter sidebar
     }
     return render(request, 'catalog/product_list.html', context)
 
 def product_detail(request, product_id):
-    """Product detail page"""
+    # Use pr_id as the primary key
     product = get_object_or_404(Product, pr_id=product_id)
-    reviews = product.review_set.all().order_by('-created_at')
     
+    # Example related products (can be improved with more complex logic)
+    related_products = Product.objects.filter(pr_cate=product.pr_cate).exclude(pr_id=product.pr_id)[:4]
+
     context = {
         'product': product,
-        'reviews': reviews,
+        'related_products': related_products,
     }
     return render(request, 'catalog/product_detail.html', context)
 
+# --- Cart Views ---
+
 @login_required
 def add_to_cart(request, product_id):
-    """Add product to cart (with quantity)"""
     product = get_object_or_404(Product, pr_id=product_id)
     cart, created = Cart.objects.get_or_create(user=request.user)
-    quantity = int(request.POST.get('quantity', 1))
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-    if not created:
-        cart_item.quantity += quantity
-    else:
-        cart_item.quantity = quantity
-    cart_item.save()
-    messages.success(request, f'{product.pr_name} added to cart!')
+    cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product)
+    
+    if not item_created:
+        cart_item.quantity += 1
+        cart_item.save()
+    messages.success(request, f"{product.pr_name} added to cart.")
     return redirect('cart')
 
 @login_required
-def cart(request):
-    """View cart and update quantities"""
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_items = cart.items.select_related('product').all()
-    total = sum(item.product.pr_price * item.quantity for item in cart_items)
+def update_cart_item(request, item_id):
+    cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     if request.method == 'POST':
-        for item in cart_items:
-            qty = int(request.POST.get(f'quantity_{item.id}', item.quantity))
-            if qty > 0:
-                item.quantity = qty
-                item.save()
+        try:
+            quantity = int(request.POST.get('quantity'))
+            if quantity > 0:
+                cart_item.quantity = quantity
+                cart_item.save()
+                messages.success(request, "Cart updated successfully.")
             else:
-                item.delete()
-        messages.success(request, 'Cart updated!')
-        return redirect('cart')
-    context = {
-        'cart_items': cart_items,
-        'total': total,
-    }
-    return render(request, 'catalog/cart.html', context)
+                cart_item.delete() # Remove if quantity is 0
+                messages.info(request, "Item removed from cart.")
+        except ValueError:
+            messages.error(request, "Invalid quantity.")
+    return redirect('cart')
 
 @login_required
 def remove_from_cart(request, item_id):
-    """Remove an item from the cart"""
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
-    cart_item.delete()
-    messages.success(request, 'Item removed from cart.')
+    if request.method == 'POST':
+        cart_item.delete()
+        messages.info(request, "Item removed from cart.")
     return redirect('cart')
 
 @login_required
-def wishlist(request):
-    """User wishlist"""
-    user_wishlist = get_object_or_404(Wishlist, user=request.user)
+def cart_view(request):
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_items = cart.items.all().order_by('product__pr_name') # Access items via related_name
+    
+    total_price = sum(item.subtotal for item in cart_items)
+    shipping_cost = 5.00 # Example fixed shipping
+    grand_total = total_price + shipping_cost # Add tax if applicable
+    
     context = {
-        'wishlist': user_wishlist,
+        'cart_items': cart_items,
+        'total_price': total_price,
+        'shipping_cost': shipping_cost,
+        'grand_total': grand_total,
     }
-    return render(request, 'catalog/wishlist.html', context)
+    return render(request, 'catalog/cart.html', context)
+
+# --- Wishlist Views ---
 
 @login_required
 def add_to_wishlist(request, product_id):
-    """Add product to wishlist"""
     product = get_object_or_404(Product, pr_id=product_id)
-    user_wishlist = get_object_or_404(Wishlist, user=request.user)
-    user_wishlist.products.add(product)
-    messages.success(request, f'{product.pr_name} added to wishlist!')
-    return redirect('product_detail', product_id=product_id)
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+    
+    if product not in wishlist.products.all():
+        wishlist.products.add(product)
+        messages.success(request, f"{product.pr_name} added to your wishlist.")
+    else:
+        messages.info(request, f"{product.pr_name} is already in your wishlist.")
+    return redirect('wishlist')
+
+@login_required
+def remove_from_wishlist(request, product_id): # Changed item_id to product_id for ManyToMany
+    product = get_object_or_404(Product, pr_id=product_id)
+    wishlist = get_object_or_404(Wishlist, user=request.user)
+    
+    if request.method == 'POST':
+        if product in wishlist.products.all():
+            wishlist.products.remove(product)
+            messages.info(request, "Item removed from wishlist.")
+        else:
+            messages.error(request, "Item not found in your wishlist.")
+    return redirect('wishlist')
+
+@login_required
+def add_to_cart_from_wishlist(request, product_id):
+    product = get_object_or_404(Product, pr_id=product_id)
+    
+    # Add to cart logic
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product)
+    if not item_created:
+        cart_item.quantity += 1
+        cart_item.save()
+    messages.success(request, f"{product.pr_name} moved to cart.")
+    
+    # Remove from wishlist after moving to cart
+    wishlist = get_object_or_404(Wishlist, user=request.user)
+    if product in wishlist.products.all():
+        wishlist.products.remove(product)
+    
+    return redirect('cart')
+
+@login_required
+def wishlist_view(request):
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+    wishlist_items = wishlist.products.all().order_by('-pr_id') # Order by product ID for consistency
+    context = {
+        'wishlist_items': wishlist_items,
+    }
+    return render(request, 'catalog/wishlist.html', context)
+
+# --- Profile View ---
+@login_required
+def profile_view(request):
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    # Assuming you have an Order model and want to display user's orders
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5] # Fetch last 5 orders
+
+    context = {
+        'user_profile': user_profile,
+        'orders': orders,
+    }
+    return render(request, 'catalog/profile.html', context)
+
+# --- Placeholder for profile_edit and password_change ---
+# You'll need to implement these views based on Django's authentication system
+@login_required
+def profile_edit(request):
+    messages.info(request, "Profile edit functionality not yet implemented.")
+    return redirect('profile')
+
+@login_required
+def password_change(request):
+    messages.info(request, "Password change functionality not yet implemented.")
+    return redirect('profile')
+
+# --- Placeholder for order_detail ---
+@login_required
+def order_detail(request, order_id):
+    # This view would fetch a specific order and its items
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    ordered_items = order.items.all() # Get all items related to this order
+
+    context = {
+        'order': order,
+        'ordered_items': ordered_items,
+    }
+    return render(request, 'catalog/order_detail.html', context) # You'll need to create order_detail.html
