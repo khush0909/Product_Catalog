@@ -8,10 +8,10 @@ class Command(BaseCommand):
     help = 'Loads products from a specified CSV file.'
 
     def add_arguments(self, parser):
-        parser.add_argument('clothing_products.csv', type=str, help='The path to the CSV file containing product data.')
+        parser.add_argument('ChazeFashion\clothing_products.csv', type=str, help='The path to the CSV file containing product data.')
 
     def handle(self, *args, **options):
-        csv_file_path = options['clothing_products.csv']
+        csv_file_path = options['ChazeFashion\clothing_products.csv']
 
         # Ensure the CSV file exists
         if not os.path.exists(csv_file_path):
@@ -36,7 +36,6 @@ class Command(BaseCommand):
 
                 for row_num, row in enumerate(reader, 1):
                     try:
-                        # Corrected: Use pr_name instead of name
                         pr_name = row.get('pr_name', '').strip()
                         pr_price_str = row.get('pr_price', '').strip()
                         pr_cate = row.get('pr_cate', '').strip()

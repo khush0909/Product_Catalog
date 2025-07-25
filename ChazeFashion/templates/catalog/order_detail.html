@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Details - ChazeFashion{% endblock title %}
+
+{% block content %}
+<div class="animate-fadeIn">
+    <h1 class="text-4xl font-bold text-white mb-8 text-center">Order Details</h1>
+
+    {% if order %} {# Assuming 'order' object is passed from Django view #}
+    <div class="bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700 max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+            <div>
+                <h2 class="text-2xl font-semibold text-white">Order #{{ order.id }}</h2>
+                <p class="text-gray-400 text-sm">Placed on: {{ order.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+            <div>
+                <span
+                    class="badge {% if order.status == 'Delivered' %}badge-success{% elif order.status == 'Pending' %}badge-warning{% else %}badge-info{% endif %} text-lg p-3">Status:
+                    {{ order.status }}</span>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-semibold text-white mb-4">Items in this Order:</h3>
+        <div class="space-y-4 mb-8">
+            {% if ordered_items %} {# Assuming 'ordered_items' (a list of OrderedItem instances) is passed #}
+            {% for item in ordered_items %}
+            <div class="flex items-center space-x-4 border-b border-gray-700 pb-4 last:border-b-0">
+                <div class="flex-shrink-0">
+                    <img src="{% if item.product.pr_images %}{{ item.product.pr_images.url }}{% else %}https://placehold.co/80x80/4a5568/e2e8f0?text=Product{% endif %}"
+                        alt="{{ item.product.pr_name }}" class="w-20 h-20 object-cover rounded-lg shadow-md">
+                </div>
+                <div class="flex-grow">
+                    <h4 class="text-lg font-semibold text-white">{{ item.product.pr_name }}</h4>
+                    <p class="text-gray-400 text-sm">Quantity: {{ item.quantity }}</p>
+                    <p class="text-pink-400 font-bold mt-1">${{ item.price|floatformat:2 }} per item</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-white font-semibold">Total:</p>
+                    <p class="text-pink-400 font-bold">${{ item.item_total|floatformat:2 }}</p>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-gray-400 text-center py-4">No items found for this order.</p>
+            {% endif %}
+        </div>
+
+        <div class="border-t border-gray-700 pt-6">
+            <h3 class="text-xl font-semibold text-white mb-4">Order Summary:</h3>
+            <div class="space-y-3 text-gray-300">
+                <div class="flex justify-between">
+                    <span>Order Total:</span>
+                    <span class="font-semibold text-white">${{ order.total_price|floatformat:2 }}</span>
+                </div>
+                {# You might add shipping and tax details here if they are part of your Order model #}
+                <div class="flex justify-between">
+                    <span>Shipping:</span>
+                    <span class="font-semibold text-white">$5.00</span> {# Example #}
+                </div>
+                <div class="flex justify-between">
+                    <span>Tax:</span>
+                    <span class="font-semibold text-white">$0.00</span> {# Example #}
+                </div>
+                <div class="flex justify-between text-2xl font-bold text-white mt-4 pt-4 border-t border-gray-700">
+                    <span>Grand Total:</span>
+                    <span class="text-pink-400">${{ order.total_price|add:"5.00"|floatformat:2 }}</span> {# Assuming
+                    total_price + fixed shipping #}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'profile' %}"
+                class="btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 hover-effect">
+                Back to Profile
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-16 bg-gray-800 rounded-lg shadow-xl border border-gray-700 max-w-2xl mx-auto">
+        <i class="fas fa-box-open text-6xl text-gray-500 mb-6"></i>
+        <p class="text-xl text-gray-300 mb-4">Order not found.</p>
+        <p class="text-gray-400">The order you are looking for might not exist or is unavailable.</p>
+        <a href="{% url 'profile' %}"
+            class="btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 hover-effect mt-8">
+            Back to Profile
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

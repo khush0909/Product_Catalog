@@ -91,6 +91,7 @@ def product_list(request):
     return render(request, 'catalog/product_list.html', context)
 
 def product_detail(request, product_id):
+    # This is the function that was reported as missing
     product = get_object_or_404(Product, pr_id=product_id)
     
     related_products = Product.objects.filter(pr_cate=product.pr_cate).exclude(pr_id=product.pr_id)[:4]
