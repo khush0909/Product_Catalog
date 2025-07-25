@@ -1,8 +1,12 @@
+import csv
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib import messages
+from django.core.files.storage import FileSystemStorage
+from decimal import Decimal # Import Decimal for precise calculations
+
 # Import all your models from catalog.models
 from .models import Product, Seller, UserProfile, Cart, CartItem, Wishlist, OrderedItem, Order, Review, Payment
 
@@ -53,7 +57,6 @@ def logout_view(request):
 
 def home(request):
     # Fetch some featured products for the homepage
-    # Using pr_id for ordering as it's the primary key and likely reflects creation order
     featured_products = Product.objects.all().order_by('-pr_id')[:8]
     # Categories are now directly from Product.CATEGORY_CHOICES
     categories = [choice[0] for choice in Product.CATEGORY_CHOICES]
@@ -69,7 +72,7 @@ def product_list(request):
     category_name = request.GET.get('category')
     sort_by = request.GET.get('sort')
 
-    if category_name and category_name != 'All Products': # 'All Products' is a display choice, not a filter
+    if category_name and category_name != 'All Products':
         products = products.filter(pr_cate__iexact=category_name)
     
     if sort_by == 'price_asc':
@@ -77,21 +80,19 @@ def product_list(request):
     elif sort_by == 'price_desc':
         products = products.order_by('-pr_price')
     elif sort_by == 'newest':
-        products = products.order_by('-pr_id') # Assuming pr_id reflects creation order
+        products = products.order_by('-pr_id')
 
     context = {
         'products': products,
         'current_category': category_name,
         'current_sort': sort_by,
-        'categories': [choice[0] for choice in Product.CATEGORY_CHOICES], # Pass categories for filter sidebar
+        'categories': [choice[0] for choice in Product.CATEGORY_CHOICES],
     }
     return render(request, 'catalog/product_list.html', context)
 
 def product_detail(request, product_id):
-    # Use pr_id as the primary key
     product = get_object_or_404(Product, pr_id=product_id)
     
-    # Example related products (can be improved with more complex logic)
     related_products = Product.objects.filter(pr_cate=product.pr_cate).exclude(pr_id=product.pr_id)[:4]
 
     context = {
@@ -142,10 +143,10 @@ def remove_from_cart(request, item_id):
 @login_required
 def cart_view(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_items = cart.items.all().order_by('product__pr_name') # Access items via related_name
+    cart_items = cart.items.all().order_by('product__pr_name')
     
     total_price = sum(item.subtotal for item in cart_items)
-    shipping_cost = 5.00 # Example fixed shipping
+    shipping_cost = Decimal('5.00') # Corrected: Converted to Decimal
     grand_total = total_price + shipping_cost # Add tax if applicable
     
     context = {
@@ -171,7 +172,7 @@ def add_to_wishlist(request, product_id):
     return redirect('wishlist')
 
 @login_required
-def remove_from_wishlist(request, product_id): # Changed item_id to product_id for ManyToMany
+def remove_from_wishlist(request, product_id):
     product = get_object_or_404(Product, pr_id=product_id)
     wishlist = get_object_or_404(Wishlist, user=request.user)
     
@@ -205,7 +206,7 @@ def add_to_cart_from_wishlist(request, product_id):
 @login_required
 def wishlist_view(request):
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
-    wishlist_items = wishlist.products.all().order_by('-pr_id') # Order by product ID for consistency
+    wishlist_items = wishlist.products.all().order_by('-pr_id')
     context = {
         'wishlist_items': wishlist_items,
     }
@@ -215,8 +216,7 @@ def wishlist_view(request):
 @login_required
 def profile_view(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    # Assuming you have an Order model and want to display user's orders
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5] # Fetch last 5 orders
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]
 
     context = {
         'user_profile': user_profile,
@@ -225,7 +225,6 @@ def profile_view(request):
     return render(request, 'catalog/profile.html', context)
 
 # --- Placeholder for profile_edit and password_change ---
-# You'll need to implement these views based on Django's authentication system
 @login_required
 def profile_edit(request):
     messages.info(request, "Profile edit functionality not yet implemented.")
@@ -239,12 +238,11 @@ def password_change(request):
 # --- Placeholder for order_detail ---
 @login_required
 def order_detail(request, order_id):
-    # This view would fetch a specific order and its items
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    ordered_items = order.items.all() # Get all items related to this order
+    ordered_items = order.items.all()
 
     context = {
         'order': order,
         'ordered_items': ordered_items,
     }
-    return render(request, 'catalog/order_detail.html', context) # You'll need to create order_detail.html
+    return render(request, 'catalog/order_detail.html', context)

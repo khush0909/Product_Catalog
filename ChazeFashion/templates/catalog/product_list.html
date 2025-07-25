@@ -16,9 +16,13 @@
             <div class="mb-6">
                 <h3 class="text-lg font-semibold text-gray-300 mb-3">Categories</h3>
                 <ul class="space-y-2">
-                    <li><a href="{% url 'product_list' %}" class="text-gray-400 hover:text-pink-400 hover-effect transition duration-300">All Products</a></li>
+                    <li><a href="{% url 'product_list' %}"
+                            class="text-gray-400 hover:text-pink-400 hover-effect transition duration-300 {% if not current_category %}font-bold{% endif %}">All
+                            Products</a></li>
                     {% for category in categories %}
-                        <li><a href="{% url 'product_list' %}?category={{ category }}" class="text-gray-400 hover:text-pink-400 hover-effect transition duration-300">{{ category }}</a></li>
+                    <li><a href="{% url 'product_list' %}?category={{ category }}"
+                            class="text-gray-400 hover:text-pink-400 hover-effect transition duration-300 {% if current_category == category %}font-bold{% endif %}">{{
+                            category }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -38,13 +42,18 @@
             <div class="mb-6">
                 <h3 class="text-lg font-semibold text-gray-300 mb-3">Brands</h3>
                 <ul class="space-y-2">
-                    <li><label class="flex items-center text-gray-400 hover:text-pink-400 hover-effect"><input type="checkbox" class="checkbox checkbox-pink mr-2"> Brand A</label></li>
-                    <li><label class="flex items-center text-gray-400 hover:text-pink-400 hover-effect"><input type="checkbox" class="checkbox checkbox-pink mr-2"> Brand B</label></li>
-                    <li><label class="flex items-center text-gray-400 hover:text-pink-400 hover-effect"><input type="checkbox" class="checkbox checkbox-pink mr-2"> Brand C</label></li>
+                    <li><label class="flex items-center text-gray-400 hover:text-pink-400 hover-effect"><input
+                                type="checkbox" class="checkbox checkbox-pink mr-2"> Brand A</label></li>
+                    <li><label class="flex items-center text-gray-400 hover:text-pink-400 hover-effect"><input
+                                type="checkbox" class="checkbox checkbox-pink mr-2"> Brand B</label></li>
+                    <li><label class="flex items-center text-gray-400 hover:text-pink-400 hover-effect"><input
+                                type="checkbox" class="checkbox checkbox-pink mr-2"> Brand C</label></li>
                 </ul>
             </div>
 
-            <button class="w-full btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg shadow-md hover-effect">Apply Filters</button>
+            <button
+                class="w-full btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg shadow-md hover-effect">Apply
+                Filters</button>
         </aside>
 
         <!-- Product Grid -->
@@ -52,54 +61,68 @@
             <div class="flex justify-between items-center mb-6">
                 <p class="text-gray-300">{{ products.count }} Products Found</p>
                 <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn bg-gray-700 hover:bg-gray-600 text-white m-1 hover-effect">
+                    <div tabindex="0" role="button"
+                        class="btn bg-gray-700 hover:bg-gray-600 text-white m-1 hover-effect">
                         Sort By <i class="fas fa-chevron-down ml-2"></i>
                     </div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-gray-800 rounded-box w-52 text-gray-200">
-                        <li><a href="{% url 'product_list' %}?sort=price_asc" class="hover:text-pink-400">Price: Low to High</a></li>
-                        <li><a href="{% url 'product_list' %}?sort=price_desc" class="hover:text-pink-400">Price: High to Low</a></li>
-                        <li><a href="{% url 'product_list' %}?sort=newest" class="hover:text-pink-400">Newest Arrivals</a></li>
+                    <ul tabindex="0"
+                        class="dropdown-content z-[1] menu p-2 shadow bg-gray-800 rounded-box w-52 text-gray-200">
+                        <li><a href="{% url 'product_list' %}?sort=price_asc"
+                                class="hover:text-pink-400 {% if current_sort == 'price_asc' %}font-bold{% endif %}">Price:
+                                Low to High</a></li>
+                        <li><a href="{% url 'product_list' %}?sort=price_desc"
+                                class="hover:text-pink-400 {% if current_sort == 'price_desc' %}font-bold{% endif %}">Price:
+                                High to Low</a></li>
+                        <li><a href="{% url 'product_list' %}?sort=newest"
+                                class="hover:text-pink-400 {% if current_sort == 'newest' %}font-bold{% endif %}">Newest
+                                Arrivals</a></li>
                     </ul>
                 </div>
             </div>
 
             {% if products %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {% for product in products %}
-                        <!-- Product Card -->
-                        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
-                            <a href="{% url 'product_detail' product_id=product.pr_id %}"> {# Changed product.id to product.pr_id #}
-                                <img src="{{ product.pr_images.url|default:'https://placehold.co/400x400/4a5568/e2e8f0?text=Product' }}" alt="{{ product.pr_name }}" class="w-full h-64 object-cover"> {# Changed product.image.url to product.pr_images.url and product.name to product.pr_name #}
-                            </a>
-                            <div class="p-4">
-                                <h3 class="text-lg font-semibold text-white mb-1">{{ product.pr_name }}</h3> {# Changed product.name to product.pr_name #}
-                                <p class="text-gray-400 text-sm mb-2">{{ product.pr_cate }}</p> {# Changed product.category.name to product.pr_cate #}
-                                <div class="flex items-center justify-between">
-                                    <span class="text-pink-400 font-bold text-xl">${{ product.pr_price|floatformat:2 }}</span> {# Changed product.price to product.pr_price #}
-                                    <button class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
-                                        <i class="fas fa-shopping-cart"></i>
-                                        <span>Add</span>
-                                    </button>
-                                </div>
-                            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {% for product in products %}
+                <!-- Product Card -->
+                <div
+                    class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
+                    <a href="{% url 'product_detail' product_id=product.pr_id %}">
+                        <img src="{% if product.pr_images %}{{ product.pr_images.url }}{% else %}https://placehold.co/400x400/4a5568/e2e8f0?text=Product{% endif %}"
+                            alt="{{ product.pr_name }}" class="w-full h-64 object-cover">
+                    </a>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-white mb-1">{{ product.pr_name }}</h3>
+                        <p class="text-gray-400 text-sm mb-2">{{ product.pr_cate }}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-pink-400 font-bold text-xl">${{ product.pr_price|floatformat:2 }}</span>
+                            <form action="{% url 'add_to_cart' product_id=product.pr_id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Add</span>
+                                </button>
+                            </form>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
 
-                <!-- Pagination (Example) -->
-                <div class="flex justify-center mt-10 space-x-2">
-                    <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">Previous</button>
-                    <button class="btn bg-pink-600 text-white hover-effect">1</button>
-                    <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">2</button>
-                    <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">3</button>
-                    <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">Next</button>
-                </div>
+            <!-- Pagination (Example) -->
+            <div class="flex justify-center mt-10 space-x-2">
+                <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">Previous</button>
+                <button class="btn bg-pink-600 text-white hover-effect">1</button>
+                <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">2</button>
+                <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">3</button>
+                <button class="btn bg-gray-700 hover:bg-gray-600 text-white hover-effect">Next</button>
+            </div>
             {% else %}
-                <div class="text-center py-16 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
-                    <i class="fas fa-box-open text-6xl text-gray-500 mb-6"></i>
-                    <p class="text-xl text-gray-300 mb-4">No products found.</p>
-                    <p class="text-gray-400">Try adjusting your filters or search terms.</p>
-                </div>
+            <div class="text-center py-16 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
+                <i class="fas fa-box-open text-6xl text-gray-500 mb-6"></i>
+                <p class="text-xl text-gray-300 mb-4">No products found.</p>
+                <p class="text-gray-400">Try adjusting your filters or search terms.</p>
+            </div>
             {% endif %}
         </div>
     </div>
