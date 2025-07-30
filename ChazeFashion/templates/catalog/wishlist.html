@@ -33,7 +33,7 @@
                                 <span>Move to Bag</span>
                             </button>
                         </form>
-                        <form action="{% url 'add_remove_wishlist' product_id=product.pr_id %}" method="post">
+                        <form action="{% url 'remove_from_wishlist' product_id=product.pr_id %}" method="post">
                             {% csrf_token %}
                             <button type="submit"
                                 class="w-full btn bg-gray-700 hover:bg-gray-600 text-white rounded-lg px-4 py-2 flex items-center justify-center space-x-2 hover-effect">
@@ -47,6 +47,27 @@
             {% endfor %}
         </div>
     </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="join grid grid-cols-2 w-1/2 mx-auto mt-8">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% url_params_current_except request 'page' %}"
+            class="join-item btn btn-outline">Previous</a>
+        {% else %}
+        <button class="join-item btn btn-outline btn-disabled" aria-disabled="true">Previous</button>
+        {% endif %}
+
+        <button class="join-item btn btn-outline no-animation" aria-current="page">Page {{ page_obj.number }} of
+            {{ page_obj.paginator.num_pages }}</button>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% url_params_current_except request 'page' %}"
+            class="join-item btn btn-outline">Next</a>
+        {% else %}
+        <button class="join-item btn btn-outline btn-disabled" aria-disabled="true">Next</button>
+        {% endif %}
+    </div>
+    {% endif %}
     {% else %}
     <div class="text-center py-16 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
         <i class="fas fa-heart-broken text-6xl text-gray-500 mb-6"></i>

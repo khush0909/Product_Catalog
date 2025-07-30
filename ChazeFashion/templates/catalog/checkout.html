@@ -1,43 +1,144 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout - ChazeFashion{% endblock title %}
+
 {% block content %}
-<div class="container mx-auto py-10">
-    <div
-        class="max-w-2xl mx-auto bg-gradient-to-br from-emerald-50 via-sky-50 to-white shadow-xl rounded-3xl border border-sky-100 p-8">
-        <h2 class="text-3xl font-extrabold mb-8 text-emerald-900 tracking-tight border-b-2 border-sky-300 pb-4">Checkout
+<div class="animate-fadeIn">
+    <div class="max-w-4xl mx-auto bg-gray-800 shadow-xl rounded-lg border border-gray-700 p-8">
+        <h2 class="text-3xl font-extrabold mb-8 text-white tracking-tight border-b-2 border-pink-400 pb-4">
+            <i class="fas fa-credit-card mr-3"></i>Checkout
         </h2>
-        <div class="overflow-x-auto mb-8">
-            <table class="table w-full">
-                <thead>
-                    <tr class="bg-sky-100 text-emerald-900">
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in cart_items %}
-                    <tr>
-                        <td class="font-semibold">{{ item.product.pr_name }}</td>
-                        <td class="text-center">{{ item.quantity }}</td>
-                        <td class="text-right">₹{{ item.product.pr_price|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Order Summary -->
+            <div class="bg-gray-900 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-xl font-semibold text-white mb-4">Order Summary</h3>
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-700 text-gray-200">
+                                <th class="text-left p-3 rounded-tl-lg">Product</th>
+                                <th class="text-center p-3">Qty</th>
+                                <th class="text-right p-3 rounded-tr-lg">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-300">
+                            {% for item in cart_items %}
+                            <tr class="border-b border-gray-700">
+                                <td class="p-3 font-semibold">{{ item.product.pr_name }}</td>
+                                <td class="text-center p-3">{{ item.quantity }}</td>
+                                <td class="text-right p-3">${{ item.subtotal|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="space-y-2 text-gray-300">
+                    <div class="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>${{ total_price|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Shipping:</span>
+                        <span>${{ shipping_cost|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tax:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="border-t border-gray-700 pt-2 mt-4">
+                        <div class="flex justify-between text-xl font-bold text-white">
+                            <span>Total:</span>
+                            <span class="text-pink-400">${{ grand_total|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="bg-gray-900 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-xl font-semibold text-white mb-4">Payment Information</h3>
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+
+                    <div>
+                        <label class="block text-gray-300 text-sm font-bold mb-2">
+                            Full Name
+                        </label>
+                        <input type="text" name="full_name" required
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                            placeholder="Enter your full name">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 text-sm font-bold mb-2">
+                            Email Address
+                        </label>
+                        <input type="email" name="email" required
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                            placeholder="Enter your email" value="{{ user.email }}">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 text-sm font-bold mb-2">
+                            Shipping Address
+                        </label>
+                        <textarea name="address" required rows="3"
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                            placeholder="Enter your shipping address"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-300 text-sm font-bold mb-2">
+                                City
+                            </label>
+                            <input type="text" name="city" required
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                                placeholder="City">
+                        </div>
+                        <div>
+                            <label class="block text-gray-300 text-sm font-bold mb-2">
+                                ZIP Code
+                            </label>
+                            <input type="text" name="zip_code" required
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                                placeholder="ZIP">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 text-sm font-bold mb-2">
+                            Payment Method
+                        </label>
+                        <select name="payment_method" required
+                            class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-400">
+                            <option value="">Select Payment Method</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="debit_card">Debit Card</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="cash_on_delivery">Cash on Delivery</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit"
+                            class="w-full btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover-effect">
+                            <i class="fas fa-credit-card mr-2"></i>Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-8 text-right">
-            <span class="text-2xl font-bold text-sky-600">Total: ₹{{ total|floatformat:2 }}</span>
-        </div>
-        <form method="post" class="flex flex-col md:flex-row gap-4 justify-end">
-            {% csrf_token %}
-            <button type="submit" class="btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold btn-lg border-0">
-                <i class="fas fa-credit-card mr-2"></i>Place Order
-            </button>
+
+        <div class="mt-8 text-center">
             <a href="{% url 'cart' %}"
-                class="btn btn-outline border-sky-400 text-sky-600 hover:bg-sky-400 hover:text-white btn-lg">
+                class="btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover-effect">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Cart
             </a>
-        </form>
+        </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}
