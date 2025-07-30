@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto py-10">
+    <div
+        class="max-w-2xl mx-auto bg-gradient-to-br from-emerald-50 via-sky-50 to-white shadow-xl rounded-3xl border border-sky-100 p-8">
+        <h2 class="text-3xl font-extrabold mb-8 text-emerald-900 tracking-tight border-b-2 border-sky-300 pb-4">Checkout
+        </h2>
+        <div class="overflow-x-auto mb-8">
+            <table class="table w-full">
+                <thead>
+                    <tr class="bg-sky-100 text-emerald-900">
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td class="font-semibold">{{ item.product.pr_name }}</td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-right">₹{{ item.product.pr_price|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mb-8 text-right">
+            <span class="text-2xl font-bold text-sky-600">Total: ₹{{ total|floatformat:2 }}</span>
+        </div>
+        <form method="post" class="flex flex-col md:flex-row gap-4 justify-end">
+            {% csrf_token %}
+            <button type="submit" class="btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold btn-lg border-0">
+                <i class="fas fa-credit-card mr-2"></i>Place Order
+            </button>
+            <a href="{% url 'cart' %}"
+                class="btn btn-outline border-sky-400 text-sky-600 hover:bg-sky-400 hover:text-white btn-lg">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Cart
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

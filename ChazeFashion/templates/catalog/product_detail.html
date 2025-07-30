@@ -1,120 +1,251 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ product.pr_name }} - ChazeFashion{% endblock title %}
-
 {% block content %}
-<div class="animate-fadeIn">
-    {% if product %}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700">
-        <!-- Product Image Gallery -->
-        <div class="flex flex-col items-center">
-            <img src="{% if product.pr_images %}{{ product.pr_images.url }}{% else %}https://placehold.co/600x600/4a5568/e2e8f0?text=Product+Image{% endif %}" alt="{{ product.pr_name }}" class="w-full max-w-lg h-auto object-cover rounded-lg shadow-md mb-4">
-            <!-- Small image thumbnails (if multiple images exist) -->
-            <div class="flex space-x-2 overflow-x-auto no-scrollbar">
-                <img src="https://placehold.co/100x100/4a5568/e2e8f0?text=Thumb1" alt="Thumbnail 1" class="w-20 h-20 object-cover rounded-md cursor-pointer border-2 border-transparent hover:border-pink-400 transition duration-300">
-                <img src="https://placehold.co/100x100/4a5568/e2e8f0?text=Thumb2" alt="Thumbnail 2" class="w-20 h-20 object-cover rounded-md cursor-pointer border-2 border-transparent hover:border-pink-400 transition duration-300">
-                <img src="https://placehold.co/100x100/4a5568/e2e8f0?text=Thumb3" alt="Thumbnail 3" class="w-20 h-20 object-cover rounded-md cursor-pointer border-2 border-transparent hover:border-pink-400 transition duration-300">
-                <!-- Add more thumbnails as needed, possibly from product.images_set -->
-            </div>
-        </div>
-
-        <!-- Product Details -->
-        <div class="flex flex-col justify-center">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">{{ product.pr_name }}</h1>
-            <p class="text-gray-400 text-lg mb-4">{{ product.pr_cate }}</p>
-
-            <div class="flex items-center mb-6">
-                <span class="text-pink-400 font-bold text-5xl">${{ product.pr_price|floatformat:2 }}</span>
-                {# Uncomment and use these if you add original_price and discount_percentage fields to your Product model #}
-                {# <span class="text-gray-500 line-through ml-4 text-xl">${{ product.original_price|default:''|floatformat:2 }}</span> #}
-                {# {% if product.discount_percentage %} #}
-                {# <span class="ml-4 text-green-400 text-lg font-semibold">{{ product.discount_percentage }}% Off</span> #}
-                {# {% endif %} #}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-base-100 p-8 rounded-lg shadow-xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div class="flex justify-center items-center h-full">
+                {% if product.pr_images %} {# Corrected: using pr_images as per your model #}
+                <img src="{{ product.pr_images.url }}" alt="{{ product.pr_name }}"
+                    class="w-full max-h-96 object-contain rounded-lg shadow-md">
+                {% else %}
+                <img src="{% static 'images/placeholder.png' %}" alt="No Image"
+                    class="w-full max-h-96 object-contain rounded-lg shadow-md">
+                {% endif %}
             </div>
 
-            <p class="text-gray-300 leading-relaxed mb-6">
-                {{ product.pr_description|default:'A high-quality product designed for comfort and style. Perfect for any occasion, offering durability and a premium feel.' }}
-            </p>
+            <div class="flex flex-col justify-between h-full">
+                <div>
+                    <h1 class="text-4xl font-extrabold text-base-content mb-4">{{ product.pr_name }}</h1> {# Corrected:
+                    using pr_name #}
+                    <p class="text-2xl font-bold text-primary mb-6">${{ product.pr_price|floatformat:2 }}</p> {#
+                    Corrected: using pr_price #}
+                    {# Assuming you have a description field in Product, replace with your actual field name #}
+                    <p class="text-base-content text-opacity-80 leading-relaxed mb-6">{{ product.description|default:"No
+                        description available." }}</p>
 
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-white mb-2">Available Sizes:</h3>
-                <div class="flex flex-wrap gap-2">
-                    {# This section assumes a method 'available_sizes_list' exists on your Product model #}
-                    {# or you have a field like pr_sizes (e.g., CharField or JSONField) that you can iterate over. #}
-                    {# For now, using a placeholder list. #}
-                    {% comment %}
-                    If you have a pr_sizes field that is a string like "S,M,L", you could do:
-                    {% for size in product.pr_sizes.split(',') %}
-                        <button class="btn btn-sm bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 rounded-md px-4 py-2 hover-effect">
-                            {{ size|strip }}
-                        </button>
-                    {% endfor %}
-                    {% endcomment %}
-                    <span class="text-gray-500 text-sm">No sizes available.</span> {# Default if no sizes are dynamically provided #}
+                    <div class="mb-6">
+                        <span class="badge badge-lg badge-accent text-accent-content font-semibold">Category: {{
+                            product.pr_cate }}</span> {# Corrected: using pr_cate #}
+                    </div>
                 </div>
-            </div>
 
-            <div class="mb-8">
-                <h3 class="text-lg font-semibold text-white mb-2">Quantity:</h3>
-                <input type="number" value="1" min="1" class="w-24 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white text-center focus:outline-none focus:ring-2 focus:ring-pink-400">
-            </div>
+                {% if user.is_authenticated %}
+                <div class="mt-auto">
+                    <form class="add-to-cart-form" data-product-id="{{ product.pr_id }}"> {# Corrected: using pr_id #}
+                        {% csrf_token %}
+                        <div class="flex items-center space-x-4 mb-6">
+                            <label for="quantity" class="text-base-content text-lg font-medium">Quantity:</label>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1"
+                                class="input input-bordered w-24 text-center text-base-content bg-base-200" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-full add-to-cart-button mb-4"
+                            id="add-to-cart-button-{{ product.pr_id }}"> {# Corrected: using pr_id #}
+                            <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                        </button>
+                    </form>
 
-            <div class="flex flex-col sm:flex-row gap-4">
-                <form action="{% url 'add_to_cart' product_id=product.pr_id %}" method="post" class="flex-1">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover-effect">
-                        <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
-                    </button>
-                </form>
-                <form action="{% url 'add_to_wishlist' product_id=product.pr_id %}" method="post" class="flex-1">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover-effect">
-                        <i class="fas fa-heart mr-2"></i> Add to Wishlist
-                    </button>
-                </form>
+                    <form class="add-remove-wishlist-form" data-product-id="{{ product.pr_id }}"> {# Corrected: using
+                        pr_id #}
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary btn-lg w-full add-remove-wishlist-button"
+                            id="add-remove-wishlist-button-{{ product.pr_id }}"> {# Corrected: using pr_id #}
+                            {% if product in user.wishlist.products.all %}
+                            <i class="fas fa-heart-broken mr-2"></i> Remove from Wishlist
+                            {% else %}
+                            <i class="fas fa-heart mr-2"></i> Add to Wishlist
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="alert alert-info mt-auto shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        class="stroke-current shrink-0 w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Please <a href="{% url 'login' %}" class="link link-primary font-bold">log in</a> to add
+                        products to your cart or wishlist.</span>
+                </div>
+                {% endif %}
             </div>
         </div>
-    </div>
 
-    <!-- Related Products Section (Example) -->
-    <section class="mt-16 animate-fadeIn" style="animation-delay: 0.2s;">
-        <h2 class="text-3xl font-bold text-white mb-8 text-center">You Might Also Like</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="divider my-10"></div>
+
+        <h2 class="text-3xl font-bold text-base-content mb-6 text-center">You might also like...</h2>
+        {% if related_products %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for related_product in related_products %}
-            <!-- Related Product Card -->
-            <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover-effect">
-                <a href="{% url 'product_detail' product_id=related_product.pr_id %}">
-                    <img src="{% if related_product.pr_images %}{{ related_product.pr_images.url }}{% else %}https://placehold.co/400x400/4a5568/e2e8f0?text=Related+Product{% endif %}" alt="{{ related_product.pr_name }}" class="w-full h-64 object-cover">
-                </a>
-                <div class="p-4">
-                    <h3 class="text-lg font-semibold text-white mb-1">{{ related_product.pr_name }}</h3>
-                    <p class="text-gray-400 text-sm mb-2">{{ related_product.pr_cate }}</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-pink-400 font-bold text-xl">${{ related_product.pr_price|floatformat:2 }}</span>
-                        <form action="{% url 'add_to_cart' product_id=related_product.pr_id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm bg-pink-600 hover:bg-pink-700 text-white rounded-full px-4 py-2 flex items-center space-x-2">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Add</span>
-                            </button>
-                        </form>
+            <div class="card bg-base-200 shadow-md transform transition duration-300 hover:scale-105">
+                <figure class="px-6 pt-6">
+                    {% if related_product.pr_images %}
+                    <img src="{{ related_product.pr_images.url }}" alt="{{ related_product.pr_name }}"
+                        class="rounded-xl w-full h-48 object-cover object-center" />
+                    {% else %}
+                    <img src="{% static 'images/placeholder.png' %}" alt="No Image"
+                        class="rounded-xl w-full h-48 object-cover object-center" />
+                    {% endif %}
+                </figure>
+                <div class="card-body items-center text-center">
+                    <h2 class="card-title">{{ related_product.pr_name }}</h2>
+                    <p class="text-lg font-semibold">${{ related_product.pr_price|floatformat:2 }}</p>
+                    <div class="card-actions">
+                        <a href="{% url 'product_detail' product_id=related_product.pr_id %}"
+                            class="btn btn-sm btn-primary">View</a>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-    </section>
-
-    {% else %}
-        <div class="text-center py-16 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
-            <i class="fas fa-exclamation-circle text-6xl text-gray-500 mb-6"></i>
-            <p class="text-xl text-gray-300 mb-4">Product not found.</p>
-            <p class="text-gray-400">The product you are looking for might not exist or is unavailable.</p>
-            <a href="{% url 'product_list' %}" class="btn bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 hover-effect mt-8">
-                Back to Products
-            </a>
-        </div>
-    {% endif %}
+        {% else %}
+        <p class="text-center text-base-content text-opacity-70 col-span-full">No related products for now.</p>
+        {% endif %}
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Add to Cart AJAX Logic ---
+        const addToCartForm = document.querySelector('.add-to-cart-form');
+
+        if (addToCartForm) {
+            addToCartForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const productId = this.dataset.productId;
+                const quantityInput = document.getElementById('quantity');
+                const quantity = quantityInput ? quantityInput.value : 1; // Get quantity from input
+                const button = this.querySelector('.add-to-cart-button');
+                const originalButtonText = button.innerHTML;
+
+                if (quantity < 1) {
+                    showToast('Quantity must be at least 1.', 'alert-warning');
+                    return;
+                }
+
+                button.disabled = true;
+                button.innerHTML = '<span class="loading loading-spinner loading-sm"></span> Adding...';
+
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                formData.append('quantity', quantity);
+
+                fetch(`/catalog/add_to_cart/${productId}/`, { // Ensure this URL matches your urls.py
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData,
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                            }).catch(() => {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            const cartCountElement = document.getElementById('cart-item-count'); // Assuming you have this in base.html
+                            if (cartCountElement) {
+                                cartCountElement.textContent = data.cart_item_count;
+                            }
+                            showToast(data.message, 'alert-success');
+                        } else {
+                            showToast(data.message || 'Something went wrong!', 'alert-error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error adding to cart:', error);
+                        showToast(`An error occurred: ${error.message}. Please try again.`, 'alert-error');
+                    })
+                    .finally(() => {
+                        button.disabled = false;
+                        button.innerHTML = originalButtonText;
+                    });
+            });
+        }
+
+        // --- Add/Remove Wishlist AJAX Logic ---
+        const addRemoveWishlistForm = document.querySelector('.add-remove-wishlist-form');
+
+        if (addRemoveWishlistForm) {
+            addRemoveWishlistForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const productId = this.dataset.productId;
+                const button = this.querySelector('.add-remove-wishlist-button');
+                const originalButtonText = button.innerHTML;
+
+                button.disabled = true;
+                button.innerHTML = '<span class="loading loading-spinner loading-sm"></span> Updating...';
+
+                fetch(`/catalog/wishlist/toggle/${productId}/`, { // This URL must match your urls.py
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: '', // No data needed for toggle
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                            }).catch(() => {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'alert-success');
+                            // Update button text based on whether item was added or removed
+                            if (data.added) {
+                                button.innerHTML = '<i class="fas fa-heart-broken mr-2"></i> Remove from Wishlist';
+                            } else {
+                                button.innerHTML = '<i class="fas fa-heart mr-2"></i> Add to Wishlist';
+                            }
+                        } else {
+                            showToast(data.message || 'Something went wrong!', 'alert-error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating wishlist:', error);
+                        showToast(`An error occurred: ${error.message}. Please try again.`, 'alert-error');
+                    })
+                    .finally(() => {
+                        button.disabled = false;
+                    });
+            });
+        }
+
+
+        // Helper function to show DaisyUI Toast (needs to be in base.html script or a common JS file)
+        function showToast(message, type = 'alert-info') {
+            const toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                console.warn('Toast container not found. Please add <div class="toast-container"></div> to your base.html');
+                return;
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `alert ${type} shadow-lg mb-2`;
+            toast.innerHTML = `<span>${message}</span>`;
+            toastContainer.prepend(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    });
+</script>
 {% endblock content %}
